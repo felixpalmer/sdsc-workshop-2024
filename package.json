@@ -1,0 +1,34 @@
+{
+  "name": "sdsc-2024-workshop",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "dev-local": "vite --config ../vite.config.local.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^4.5.0"
+  },
+  "dependencies": {
+    "@deck.gl/aggregation-layers": "9.0.27",
+    "@deck.gl/carto": "9.0.27",
+    "@deck.gl/core": "9.0.27",
+    "@deck.gl/extensions": "9.0.27",
+    "@deck.gl/geo-layers": "9.0.27",
+    "@deck.gl/layers": "9.0.27",
+    "@deck.gl/mesh-layers": "9.0.27",
+    "@types/react": "^18.2.37",
+    "maplibre-gl": "^3.5.2",
+    "react": "^18.2.0"
+  },
+  "overrides": {
+    "@luma.gl/constants": "9.0.15",
+    "@luma.gl/core": "9.0.15",
+    "@luma.gl/engine": "9.0.15",
+    "@luma.gl/gltf": "9.0.15",
+    "@luma.gl/shadertools": "9.0.15",
+    "@luma.gl/webgl": "9.0.15"
+  }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://app.carto.com/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://app.carto.com/favicon/favicon-16x16.png"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARTO + deck.gl - fetchMap</title>
+  <body>
+    <div id="app">
+      <div id="map"></div>
+      <canvas id="deck-canvas"></canvas>
+    </div>
+    <div id="story-card">
+      <div class="layer-controls"> 
+        <p class="overline">Duration filter</p>
+        <input type="range" id="min-duration-slider" min="0" max="120" class="range-slider" value="0">
+      </br>
+        <input type="range" id="max-duration-slider" min="0" max="120" class="range-slider" value="120">
+        <p><span id="duration-label">0 - 120 minutes</span></p>
+        <!--p class="overline">Layers</p>
+        <div class="basemap-selector">
+          <img class="basemap-button" data-map-id="ea84ae4203ef21cd" src="./images/preview-points.png" alt="Points">
+          <img class="basemap-button" data-map-id="2fccc3b36c22a0e2" src="./images/preview-buildings.png" alt="Buildings">
+        </div-->
+      </div>
+    </div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>
