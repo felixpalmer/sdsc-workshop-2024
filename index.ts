@@ -17,7 +17,7 @@ import { ArcLayer } from '@deck.gl/layers';
 import DiamondLayer from './diamond-layer';
 import { pointToArcDataTransform } from './arc-utils';
 import { createUI } from './ui';
-import { createStore } from './utils';
+import { createStore, easeInOutCubic } from './utils';
 
 let deck: Deck;
 
@@ -33,10 +33,6 @@ const state = createStore(
 createUI(state);
 
 const cartoMapId = '7fe0992f-ee41-4d6d-9dd2-8038d53368b4';
-
-function easeInOutCubic(x: number): number {
-  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-}
 
 let currentViewState: Record<string, MapViewState> = {
   main: {
