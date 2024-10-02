@@ -3,7 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import maplibregl from 'maplibre-gl';
 
-import { colorBins, fetchMap } from '@deck.gl/carto';
+import { HeatmapTileLayer, VectorTileLayer, colorBins, fetchMap } from '@deck.gl/carto';
 import {
   Deck,
   FlyToInterpolator,
@@ -12,39 +12,37 @@ import {
   MapViewState,
 } from '@deck.gl/core';
 import { DataFilterExtension } from '@deck.gl/extensions';
-import { ArcLayer } from '@deck.gl/layers';
+import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 
 import DiamondLayer from './diamond-layer';
 import { pointToArcDataTransform } from './arc-utils';
-import { createUI } from './ui';
-import { createStore, easeInOutCubic } from './utils';
+import { createUI, getStationTooltip } from './ui';
+import { createStore, easeInOutCubic, toSeconds } from './utils';
+import { VectorTileLayerProps } from '@deck.gl/carto/dist/layers/vector-tile-layer';
 
-let deck: Deck;
 
 // App State
-const state = createStore(
+type State = {
+  builderLayers: [
+    VectorTileLayer, VectorTileLayer, HeatmapTileLayer, GeoJsonLayer
+  ],
+  range: [number, number],
+  selectedStation: number
+}
+const state = createStore<State>(
   {
-    builderLayers: [] as Layer[],
     range: [0, 120] as [number, number],
     selectedStation: -1,
-  },
+  } as State,
   render
 );
 createUI(state);
 
 const cartoMapId = '7fe0992f-ee41-4d6d-9dd2-8038d53368b4';
 
-let currentViewState: Record<string, MapViewState> = {
-  main: {
-    latitude: 40.7075643973699,
-    longitude: -73.98119878435548,
-    zoom: 12,
-  },
-  minimap: {
-    latitude: 40.7075643973699,
-    longitude: -73.98119878435548,
-    zoom: 12,
-  },
+let currentViewState: Record<'main' | 'minimap', MapViewState> = {
+  main: { latitude: 40, longitude: -73, zoom: 12 },
+  minimap: { latitude: 40, longitude: -73, zoom: 12 }
 };
 
 const VIEWS = [
@@ -74,47 +72,34 @@ const VIEWS = [
   }),
 ];
 
+let deck: Deck<typeof VIEWS>;
+
 fetchMap({ cartoMapId }).then(({ basemap, initialViewState, layers }) => {
   currentViewState = {
     main: initialViewState,
     minimap: { ...initialViewState, zoom: 12 },
   };
+  debugger;
   deck = new Deck({
     canvas: 'deck-canvas',
     controller: true,
     initialViewState: currentViewState,
-    getTooltip: ({ object }) => {
-      return (
-        object && {
-          html: `
-        <strong>Station id</strong>: ${object.properties.start_station_id}<br/>
-        <strong>Rides</strong>: ${object.properties.ride_count}<br/>
-      `,
-        }
-      );
-    },
+    getTooltip: getStationTooltip,
     layerFilter: ({ layer, viewport, isPicking }) => {
-      const { cartoLabel } = layer.props;
-
+      // Only render layers tagged `minimap` in minimap
       if (viewport.id === 'minimap') {
+        // Do not pick anything in the minimap
+        if (isPicking) return false;
         return layer.id.includes('minimap');
       } else if (layer.id.includes('minimap')) {
         return false;
       }
 
-      if (isPicking && viewport.id === 'minimap') {
-        // Do not pick anything in the minimap
-        return false;
-      }
-
+      // Heatmap only above 12
       if (viewport.zoom > 12) {
-        if (cartoLabel === 'Heatmap') {
-          return false;
-        }
+        if (layer.id === 'heatmap') return false;
       } else {
-        if (cartoLabel !== 'Heatmap') {
-          return false;
-        }
+        if (layer.id !== 'heatmap') return false;
       }
 
       return true;
@@ -126,7 +111,7 @@ fetchMap({ cartoMapId }).then(({ basemap, initialViewState, layers }) => {
   const map = new maplibregl.Map({
     container: 'map',
     interactive: false,
-    ...(basemap.props as any), // TODO fix!!!
+    ...(basemap!.props as any)
   });
   deck.setProps({
     onViewStateChange: ({ viewState, viewId }) => {
@@ -142,9 +127,6 @@ fetchMap({ cartoMapId }).then(({ basemap, initialViewState, layers }) => {
             //pitch: viewState.pitch,
           },
         };
-
-        const { longitude, latitude, ...rest } = viewState;
-        map.jumpTo({ center: [longitude, latitude], ...rest });
       } else {
         // Only allow the user to change the zoom in the minimap
         currentViewState = {
@@ -155,18 +137,19 @@ fetchMap({ cartoMapId }).then(({ basemap, initialViewState, layers }) => {
           },
         };
       }
+
       // Apply the new view state
       deck.setProps({ viewState: currentViewState });
+
+      // Sync Maplibre basemap to deck
+      const { longitude, latitude, ...rest } = currentViewState.main;
+      map.jumpTo({ center: [longitude, latitude], ...rest });
     },
   });
 
   // Update state last as it will trigger the first render
-  state.builderLayers = layers;
+  state.builderLayers = layers as State["builderLayers"];
 });
-
-function toSeconds(minutes) {
-  return 60 * minutes;
-}
 
 const getArcColor = colorBins({
   attr: 'duration',
@@ -252,6 +235,7 @@ function render() {
     }),
 
     heatmap.clone({
+      id: 'heatmap',
       pickable: false,
       visible: true,
       colorRange: [

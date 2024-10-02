@@ -19,3 +19,14 @@ export function createUI(state: { range: [number, number] }) {
   minSlider?.addEventListener('input', onSliderInput, false);
   maxSlider?.addEventListener('input', onSliderInput, false);
 }
+
+export function getStationTooltip(info: any) {
+  if (!info?.object) return null;
+  const {start_station_id, ride_count} = info.object.properties;
+  return {
+    html: `
+    <strong>Station id</strong>: ${start_station_id}<br/>
+    <strong>Rides</strong>: ${ride_count}<br/>
+  `,
+  }
+}
