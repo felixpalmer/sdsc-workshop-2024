@@ -1,4 +1,6 @@
 export function createUI(state: { range: [number, number] }) {
+  document.getElementById('story-card')!.style.display = 'block';  
+
   const minSlider = document.querySelector<HTMLSelectElement>(
     '#min-duration-slider'
   )!;

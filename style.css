@@ -13,6 +13,7 @@ canvas {
 }
 
 #story-card {
+  display: none; /* Will be shown in createUI() */
   position: absolute;
   padding: 1.75rem;
   background: #fdfdfe;
