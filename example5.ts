@@ -79,54 +79,47 @@ const getArcColor = colorBins({
   colors: 'Safe',
 });
 
+function onStationClick(info) {
+  if (info.object) {
+    const [longitude, latitude] = info.object.geometry.coordinates;
+    currentViewState = {
+      main: {
+        ...currentViewState.main,
+        longitude,
+        latitude,
+        transitionInterpolator: new FlyToInterpolator({ speed: 0.3 }),
+        transitionDuration: 'auto',
+        transitionEasing: easeInOutCubic,
+      },
+      minimap: currentViewState.minimap,
+    };
+
+    deck.setProps({ viewState: currentViewState });
+    state.selectedStation = info.object.properties.start_station_id;
+  }
+}
+
 function render() {
   const [stations, points, heatmap, buildings] = state.builderLayers;
 
+  const diamonds = stations.clone({
+    id: 'stations',
+    visible: true,
+    pickable: true,
+    parameters: { depthTest: false },
+    _subLayerProps: { 'points-circle': { type: DiamondLayer } },
+    getPointRadius: (p) =>
+      p.properties.start_station_id === state.selectedStation ? 20 : 10,
+    updateTriggers: { getPointRadius: state.selectedStation },
+    transitions: { getPointRadius: { type: 'spring', damping: 0.1 } },
+  });
+
   const layers = [
-    stations.clone({
-      id: 'stations',
-      visible: true,
-      pickable: true,
-      parameters: { depthTest: false },
-      onClick: (info) => {
-        if (info.object) {
-          const [longitude, latitude] = info.object.geometry.coordinates;
-          currentViewState = {
-            main: {
-              ...currentViewState.main,
-              longitude,
-              latitude,
-              transitionInterpolator: new FlyToInterpolator({ speed: 0.3 }),
-              transitionDuration: 'auto',
-              transitionEasing: easeInOutCubic,
-            },
-            minimap: currentViewState.minimap,
-          };
-          deck.setProps({ viewState: currentViewState });
-          state.selectedStation = info.object.properties.start_station_id;
-        }
-      },
-      _subLayerProps: { 'points-circle': { type: DiamondLayer } },
-      getPointRadius: (p) =>
-        p.properties.start_station_id === state.selectedStation ? 20 : 10,
-      updateTriggers: { getPointRadius: state.selectedStation },
-      transitions: { getPointRadius: { type: 'spring', damping: 0.1 } },
-    }),
+    diamonds.clone({ id: 'stations', onClick: onStationClick }),
 
-    stations.clone({
-      id: 'stations-minimap',
-      visible: true,
-      pickable: false,
-      pointRadiusScale: 0.8,
-      lineWidthScale: 0.5,
-      _subLayerProps: { 'points-circle': { type: DiamondLayer } },
-    }),
+    diamonds.clone({ id: 'stations-minimap', pointRadiusScale: 0.8, lineWidthScale: 0.5 }),
 
-    buildings.clone({
-      id: 'buildings-minimap',
-      pickable: false,
-      visible: true
-    }),
+    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true }),
 
     points.clone({
       id: 'arcs',
