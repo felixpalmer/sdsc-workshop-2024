@@ -1,5 +1,5 @@
 export function createUI(state: { range: [number, number] }) {
-  document.getElementById('story-card')!.style.display = 'block';  
+  document.getElementById('story-card')!.style.display = 'block';
 
   const minSlider = document.querySelector<HTMLSelectElement>(
     '#min-duration-slider'
@@ -24,11 +24,10 @@ export function createUI(state: { range: [number, number] }) {
 
 export function getStationTooltip(info: any) {
   if (!info?.object) return null;
-  const {start_station_id, ride_count} = info.object.properties;
-  return {
-    html: `
-    <strong>Station id</strong>: ${start_station_id}<br/>
-    <strong>Rides</strong>: ${ride_count}<br/>
-  `,
+  const { start_station_id, ride_count } = info.object.properties;
+  let html = ''
+  for (const [name, value] of Object.entries(info.object.properties)) {
+    html += `<strong>${name}</strong>: ${value}<br/>`;
   }
+  return { html }
 }

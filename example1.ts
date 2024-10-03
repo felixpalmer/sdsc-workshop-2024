@@ -7,12 +7,12 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 import { createStore } from './utils';
 
 // App State
-const state = createStore<State>({} as State, render);
 type State = {
   builderLayers: [
     VectorTileLayer, VectorTileLayer, HeatmapTileLayer, GeoJsonLayer
   ]
 }
+const state = createStore<State>({} as State, render);
 
 // Simple deck render function
 let deck: Deck;
