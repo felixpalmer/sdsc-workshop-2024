@@ -4,13 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibregl from 'maplibre-gl';
 
 import { HeatmapTileLayer, VectorTileLayer, colorBins, fetchMap } from '@deck.gl/carto';
-import {
-  Deck,
-  FlyToInterpolator,
-  Layer,
-  MapView,
-  MapViewState,
-} from '@deck.gl/core';
+import { Deck, FlyToInterpolator, MapView, MapViewState } from '@deck.gl/core';
 import { DataFilterExtension } from '@deck.gl/extensions';
 import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 
@@ -18,7 +12,6 @@ import DiamondLayer from './diamond-layer';
 import { pointToArcDataTransform } from './arc-utils';
 import { createUI, getStationTooltip } from './ui';
 import { createStore, easeInOutCubic, toSeconds } from './utils';
-import { VectorTileLayerProps } from '@deck.gl/carto/dist/layers/vector-tile-layer';
 
 // App State
 type State = {

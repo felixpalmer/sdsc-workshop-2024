@@ -55,7 +55,7 @@ export async function initialize() {
 
   deck = new Deck({
     canvas: 'deck-canvas', controller: true, initialViewState,
-    getTooltip: getStationTooltip // <-- Add tooltip
+    getTooltip: getStationTooltip
   });
 
   const map = new maplibregl.Map({ container: 'map', interactive: false, ...(basemap!.props as any) });
