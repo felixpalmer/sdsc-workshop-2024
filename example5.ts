@@ -145,7 +145,7 @@ function render() {
           ],
           filterRange: [
             [state.selectedStation - 0.5, state.selectedStation + 0.5],
-            state.range.map(toSeconds),
+            toSeconds(state.range),
           ],
         },
       },
