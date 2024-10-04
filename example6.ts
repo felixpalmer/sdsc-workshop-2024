@@ -9,6 +9,7 @@ import { DataFilterExtension } from '@deck.gl/extensions';
 import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 
 import DiamondLayer from './diamond-layer';
+import GlowingArcLayer, { ADDITIVE_BLEND_PARAMETERS } from './glowing-arc-layer';
 import { pointToArcDataTransform } from './arc-utils';
 import { createUI, getStationTooltip } from './ui';
 import { createStore, easeInOutCubic, toSeconds } from './utils';
@@ -24,7 +25,7 @@ type State = {
 const state = createStore<State>(
   {
     range: [0, 120] as [number, number],
-    selectedStation: 3254,
+    selectedStation: -1,
   } as State,
   render
 );
@@ -32,15 +33,36 @@ createUI(state);
 
 const cartoMapId = '7fe0992f-ee41-4d6d-9dd2-8038d53368b4';
 
-let currentViewState: Record<'main', MapViewState> = {
-  main: { latitude: 40, longitude: -73, zoom: 12 }
+let currentViewState: Record<'main' | 'minimap', MapViewState> = {
+  main: { latitude: 40, longitude: -73, zoom: 12 },
+  minimap: { latitude: 40, longitude: -73, zoom: 12 }
 };
 
 const VIEWS = [
   new MapView({
     id: 'main',
     controller: true,
-  })
+  }),
+  new MapView({
+    id: 'minimap',
+
+    // Position bottom-left of main map
+    x: '1%',
+    y: '69%',
+    width: '30%',
+    height: '30%',
+
+    // Minimap is overlaid on top of an existing view, so need to clear the background
+    clear: { color: [0, 0, 0, 0.8], depth: true },
+
+    controller: {
+      scrollZoom: true,
+      maxZoom: 17,
+      minZoom: 12,
+      dragRotate: false,
+      keyboard: false,
+    },
+  }),
 ];
 
 let deck: Deck<typeof VIEWS>;
@@ -62,7 +84,8 @@ function onStationClick(info) {
         transitionInterpolator: new FlyToInterpolator({ speed: 0.3 }),
         transitionDuration: 'auto',
         transitionEasing: easeInOutCubic,
-      }
+      },
+      minimap: currentViewState.minimap,
     };
 
     deck.setProps({ viewState: currentViewState });
@@ -73,34 +96,41 @@ function onStationClick(info) {
 function render() {
   const [stations, points, heatmap, buildings] = state.builderLayers;
 
+  const diamonds = stations.clone({
+    id: 'stations',
+    visible: true,
+    pickable: true,
+    parameters: { depthTest: false },
+    _subLayerProps: { 'points-circle': { type: DiamondLayer } },
+    getPointRadius: (p) =>
+      p.properties.start_station_id === state.selectedStation ? 20 : 10,
+    updateTriggers: { getPointRadius: state.selectedStation },
+    transitions: { getPointRadius: { type: 'spring', damping: 0.1 } },
+  });
+
   const layers = [
-    stations.clone({
-      id: 'stations',
-      visible: true,
-      pickable: true,
-      onClick: onStationClick,
-      parameters: { depthTest: false },
-      _subLayerProps: { 'points-circle': { type: DiamondLayer } },
-      getPointRadius: (p) =>
-        p.properties.start_station_id === state.selectedStation ? 20 : 10,
-      updateTriggers: { getPointRadius: state.selectedStation },
-      transitions: { getPointRadius: { type: 'spring', damping: 0.1 } },
-    }),
+    diamonds.clone({ id: 'stations', onClick: onStationClick }),
+
+    diamonds.clone({ id: 'stations-minimap', pointRadiusScale: 0.8, lineWidthScale: 0.5 }),
+
+    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true }),
 
     points.clone({
       id: 'arcs',
       pointType: 'circle',
       visible: true,
       pickable: false,
-      opacity: 1,
+      opacity: 0.5,
       _subLayerProps: {
         'points-circle': {
-          type: ArcLayer,
+          type: GlowingArcLayer,
           dataTransform: pointToArcDataTransform,
           getSourcePosition: (d) => d.geometry[0],
           getTargetPosition: (d) => d.geometry[1],
           getSourceColor: getArcColor,
           getTargetColor: getArcColor,
+          widthScale: 8,
+          parameters: ADDITIVE_BLEND_PARAMETERS,
 
           // Filtering
           extensions: [new DataFilterExtension({ filterSize: 2 })],
@@ -115,27 +145,67 @@ function render() {
         },
       },
     }),
+
+    heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 50, intensity: 5, tileSize: 1024 }),
   ];
   deck.setProps({ layers });
 }
 
 export async function initialize() {
   const { basemap, initialViewState, layers } = await fetchMap({ cartoMapId });
-  currentViewState = { main: initialViewState };
+  currentViewState = {
+    main: initialViewState,
+    minimap: { ...initialViewState, zoom: 12 },
+  };
   deck = new Deck({
     canvas: 'deck-canvas',
     controller: true,
     initialViewState: currentViewState,
     getTooltip: getStationTooltip,
+    layerFilter: ({ layer, viewport, isPicking }) => {
+      // Only render layers tagged `minimap` in minimap
+      if (viewport.id === 'minimap') {
+        // Do not pick anything in the minimap
+        if (isPicking) return false;
+        return layer.id.includes('minimap');
+      } else if (layer.id.includes('minimap')) {
+        return false;
+      }
+
+      // Heatmap only above 12
+      if (viewport.zoom > 12) {
+        if (layer.id === 'heatmap') return false;
+      } else {
+        if (layer.id !== 'heatmap') return false;
+      }
+
+      return true;
+    },
     views: VIEWS,
   });
 
   // Add basemap
-  const map = new maplibregl.Map({ container: 'map', interactive: false, ...(basemap!.props as any) });
+  const map = new maplibregl.Map({
+    container: 'map',
+    interactive: false,
+    ...(basemap!.props as any)
+  });
   deck.setProps({
     onViewStateChange: ({ viewState, viewId }) => {
-      const { longitude, latitude } = viewState;
-      currentViewState = { main: viewState };
+      const { longitude, latitude, bearing } = viewState;
+      if (viewId === 'main') {
+        // When user moves the camera in the first-person view, the minimap should follow
+        currentViewState = {
+          main: viewState,
+          minimap: { ...currentViewState.minimap, longitude, latitude, bearing },
+        };
+      } else {
+        // Only allow the user to change the zoom in the minimap
+        currentViewState = {
+          main: currentViewState.main,
+          minimap: { ...currentViewState.minimap, zoom: viewState.zoom },
+        };
+      }
 
       // Apply the new view state to deck
       deck.setProps({ viewState: currentViewState });
