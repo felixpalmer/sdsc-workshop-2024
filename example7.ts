@@ -129,12 +129,12 @@ function render() {
           getTargetPosition: (d) => d.geometry[1],
           getSourceColor: getArcColor,
           getTargetColor: getArcColor,
-          widthScale: 8,
+          widthScale: 12,
           parameters: ADDITIVE_BLEND_PARAMETERS,
 
           // Filtering
           extensions: [new DataFilterExtension({filterSize: 2}), new BrushingExtension()],
-          brushingEnabled: false,
+          brushingEnabled: true,
           brushingRadius: 1000,
           brushingTarget: 'target',
           getFilterValue: (d) => [
