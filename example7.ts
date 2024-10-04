@@ -5,7 +5,7 @@ import maplibregl from 'maplibre-gl';
 
 import { HeatmapTileLayer, VectorTileLayer, colorBins, fetchMap } from '@deck.gl/carto';
 import { Deck, FlyToInterpolator, MapView, MapViewState } from '@deck.gl/core';
-import { DataFilterExtension } from '@deck.gl/extensions';
+import { BrushingExtension, DataFilterExtension } from '@deck.gl/extensions';
 import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
 
 import DiamondLayer from './diamond-layer';
@@ -133,7 +133,10 @@ function render() {
           parameters: ADDITIVE_BLEND_PARAMETERS,
 
           // Filtering
-          extensions: [new DataFilterExtension({ filterSize: 2 })],
+          extensions: [new DataFilterExtension({filterSize: 2}), new BrushingExtension()],
+          brushingEnabled: false,
+          brushingRadius: 1000,
+          brushingTarget: 'target',
           getFilterValue: (d) => [
             d.properties.start_station_id,
             d.properties.duration,
