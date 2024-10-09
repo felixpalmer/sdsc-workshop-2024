@@ -53,10 +53,12 @@ const VIEWS = [
     height: '30%',
 
     // Minimap is overlaid on top of an existing view, so need to clear the background
+        // @ts-expect-error
     clear: { color: [0, 0, 0, 0.8], depth: true },
 
     controller: {
       scrollZoom: true,
+          // @ts-expect-error
       maxZoom: 17,
       minZoom: 12,
       dragRotate: false,
@@ -100,6 +102,7 @@ function render() {
     id: 'stations',
     visible: true,
     pickable: true,
+        // @ts-expect-error
     parameters: { depthTest: false },
     _subLayerProps: { 'points-circle': { type: DiamondLayer } },
     getPointRadius: (p) =>

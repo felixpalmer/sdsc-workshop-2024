@@ -11,7 +11,6 @@ export default class DiamondLayer extends ScatterplotLayer {
 
       // Simple linear function to give pyramid/cone shape
       float z = 1.0 - distToCenter / outerRadiusPixels;
-      //z = sin(10.0 * z); // Add wave
       z = 0.3 * z; // Scale height
 
       // Compute normal numerically
