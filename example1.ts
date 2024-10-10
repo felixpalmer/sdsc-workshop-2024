@@ -20,7 +20,7 @@ function render() {
   const [stations, points, heatmap, buildings] = state.builderLayers;
 
   const layers = [
-    stations.clone({visible: true}),
+    stations.clone({visible: true, parameters: { depthWriteEnabled: false }}),
     buildings.clone({pickable: false, visible: true}),
   ];
   deck.setProps({ layers });

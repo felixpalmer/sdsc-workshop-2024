@@ -26,6 +26,7 @@ function render() {
   const layers = [
     stations.clone({
       visible: true,
+      parameters: { depthWriteEnabled: false },
 
       extensions: [new DataFilterExtension({ filterSize: 1 })],
       getFilterValue: (d) => d.properties.duration,
