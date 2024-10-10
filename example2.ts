@@ -33,7 +33,7 @@ function render() {
             getFilterValue: (d) => d.properties.duration,
             filterRange: toSeconds(state.range)
         }),
-        buildings.clone({ pickable: false, visible: true }),
+        buildings.clone({ pickable: false, visible: true, parameters: { depthWriteEnabled: false } }),
     ];
     deck.setProps({ layers });
 }

@@ -61,7 +61,7 @@ function render() {
   const layers = [
     stations.clone({ id: 'stations-minimap', visible: true, pickable: false, parameters: { depthWriteEnabled: false } }),
     
-    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true }),
+    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true, parameters: { depthWriteEnabled: false } }),
 
     heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 50, intensity: 5, tileSize: 1024 }),
   ];

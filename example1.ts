@@ -21,7 +21,7 @@ function render() {
 
   const layers = [
     stations.clone({visible: true, parameters: { depthWriteEnabled: false }}),
-    buildings.clone({pickable: false, visible: true}),
+    buildings.clone({pickable: false, visible: true, parameters: { depthWriteEnabled: false }}),
   ];
   deck.setProps({ layers });
 }

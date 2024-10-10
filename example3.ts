@@ -44,7 +44,7 @@ function render() {
       // v--- Only modify opacity for circles ---v
       _subLayerProps: { 'points-circle': { opacity: 0.3 } }
     }),
-    buildings.clone({ pickable: false, visible: true }),
+    buildings.clone({ pickable: false, visible: true, parameters: { depthWriteEnabled: false } }),
   ];
   deck.setProps({ layers });
 }
