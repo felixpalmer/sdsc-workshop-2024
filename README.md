@@ -1,12 +1,8 @@
-## Example: Hello World CARTO + deck.gl
-
-A simple point-based layer on top of a CARTO basemap, to get things started. All examples, including our Hello World, are using live data coming from a data warehouse (Google BigQuery, Snowflake, Amazon Redshift...)
-
-Uses [Vite](https://vitejs.dev/) to bundle and serve files.
+## New horizons in deck.gl - workshop SDSC 2024 NYC
 
 ## Usage
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/CartoDB/deck.gl-examples/tree/master/hello-world?file=index.ts)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/~/github/felixpalmer/sdsc-workshop-2024/index.ts)
 
 Or run it locally:
 
