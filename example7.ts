@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibregl from 'maplibre-gl';
 
 import { HeatmapTileLayer, VectorTileLayer, colorBins, fetchMap } from '@deck.gl/carto';
-import { Deck, FlyToInterpolator, MapView, MapViewState } from '@deck.gl/core';
+import { Deck, FlyToInterpolator, MapView, MapViewState, TRANSITION_EVENTS } from '@deck.gl/core';
 import { BrushingExtension, DataFilterExtension } from '@deck.gl/extensions';
 import { ArcLayer, GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
 
@@ -22,13 +22,15 @@ type State = {
   ],
   mouseCoordinate?: [number, number],
   range: [number, number],
-  selectedStation: number
+  selectedStation: number,
+  minimapZoom: number
 }
 const state = createStore<State>(
   {
     brushingRadius: 1,
     range: [0, 120] as [number, number],
     selectedStation: -1,
+    minimapZoom: 12
   } as State,
   render
 );
@@ -99,6 +101,7 @@ function onStationClick(info) {
 }
 
 function render() {
+  console.log('re');
   const [stations, points, heatmap, buildings] = state.builderLayers;
 
   const diamonds = stations.clone({
@@ -130,7 +133,13 @@ function render() {
 
     diamonds.clone({ id: 'stations-minimap', pointRadiusScale: 0.8, lineWidthScale: 0.5 }),
 
-    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true, parameters: {depthWriteEnabled: false} }),
+    buildings.clone({
+      id: 'buildings-minimap',
+      pickable: false,
+      visible: true,
+      parameters: { depthWriteEnabled: false },
+      extruded: state.minimapZoom < 14
+    }),
 
     points.clone({
       id: 'arcs',
@@ -150,7 +159,7 @@ function render() {
           parameters: ADDITIVE_BLEND_PARAMETERS,
 
           // Filtering
-          extensions: [new DataFilterExtension({filterSize: 2}), new BrushingExtension()],
+          extensions: [new DataFilterExtension({ filterSize: 2 }), new BrushingExtension()],
           brushingEnabled: state.brushingRadius > 0,
           brushingRadius,
           brushingTarget: 'target',
@@ -229,6 +238,7 @@ export async function initialize() {
           main: currentViewState.main,
           minimap: { ...currentViewState.minimap, zoom: viewState.zoom },
         };
+        state.minimapZoom = currentViewState.minimap.zoom
       }
 
       // Apply the new view state to deck
