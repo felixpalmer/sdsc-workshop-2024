@@ -79,7 +79,7 @@ function render() {
       visible: true,
       pickable: true,
       onClick: onStationClick,
-      parameters: { depthTest: false },
+      parameters: { depthWriteEnabled: false },
       _subLayerProps: { 'points-circle': { type: DiamondLayer } },
       getPointRadius: (p) =>
         p.properties.start_station_id === state.selectedStation ? 20 : 10,

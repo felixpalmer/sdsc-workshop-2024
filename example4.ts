@@ -33,6 +33,7 @@ function render() {
   const layers = [
     stations.clone({
       visible: true,
+      parameters: { depthWriteEnabled: false },
 
       // v--- Highlight selected station ---v
       onClick: onStationClick,

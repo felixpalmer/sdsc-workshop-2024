@@ -26,6 +26,7 @@ function render() {
     const layers = [
         stations.clone({
             visible: true,
+            parameters: { depthWriteEnabled: false },
 
             // v--- Add in filtering ---v
             extensions: [new DataFilterExtension({ filterSize: 1 })],

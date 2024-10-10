@@ -39,10 +39,12 @@ const VIEWS = [
     height: '30%',
 
     // Minimap is overlaid on top of an existing view, so need to clear the background
+    // @ts-expect-error
     clear: { color: [0, 0, 0, 0.8], depth: true },
 
     controller: {
       scrollZoom: true,
+      // @ts-expect-error
       maxZoom: 17,
       minZoom: 12,
       dragRotate: false,
@@ -57,7 +59,7 @@ function render() {
   const [stations, points, heatmap, buildings] = state.builderLayers;
 
   const layers = [
-    stations.clone({ id: 'stations-minimap', visible: true, pickable: false }),
+    stations.clone({ id: 'stations-minimap', visible: true, pickable: false, parameters: { depthWriteEnabled: false } }),
     
     buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true }),
 
