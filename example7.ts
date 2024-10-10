@@ -6,7 +6,7 @@ import maplibregl from 'maplibre-gl';
 import { HeatmapTileLayer, VectorTileLayer, colorBins, fetchMap } from '@deck.gl/carto';
 import { Deck, FlyToInterpolator, MapView, MapViewState } from '@deck.gl/core';
 import { BrushingExtension, DataFilterExtension } from '@deck.gl/extensions';
-import { ArcLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { ArcLayer, GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
 
 import DiamondLayer from './diamond-layer';
 import GlowingArcLayer, { ADDITIVE_BLEND_PARAMETERS } from './glowing-arc-layer';
@@ -20,6 +20,7 @@ type State = {
   builderLayers: [
     VectorTileLayer, VectorTileLayer, HeatmapTileLayer, GeoJsonLayer
   ],
+  mouseCoordinate?: [number, number],
   range: [number, number],
   selectedStation: number
 }
@@ -112,12 +113,24 @@ function render() {
     transitions: { getPointRadius: { type: 'spring', damping: 0.1 } },
   });
 
+  const brushingRadius = state.brushingRadius * 1609.34; // Convert to medieval unit system
+
   const layers = [
+    state.brushingRadius > 0 && state.selectedStation > 0 && state.mouseCoordinate && new ScatterplotLayer({
+      data: [state.mouseCoordinate],
+      getPosition: d => d,
+      radiusScale: brushingRadius,
+      stroked: true,
+      lineWidthMinPixels: 3,
+      getFillColor: [255, 255, 255, 20],
+      getLineColor: [0, 0, 0, 50]
+    }),
+
     diamonds.clone({ id: 'stations', onClick: onStationClick }),
 
     diamonds.clone({ id: 'stations-minimap', pointRadiusScale: 0.8, lineWidthScale: 0.5 }),
 
-    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true }),
+    buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true, parameters: {depthWriteEnabled: false} }),
 
     points.clone({
       id: 'arcs',
@@ -139,7 +152,7 @@ function render() {
           // Filtering
           extensions: [new DataFilterExtension({filterSize: 2}), new BrushingExtension()],
           brushingEnabled: state.brushingRadius > 0,
-          brushingRadius: state.brushingRadius * 1609.34, // Convert to medieval unit system
+          brushingRadius,
           brushingTarget: 'target',
           getFilterValue: (d) => [
             d.properties.start_station_id,
@@ -169,6 +182,10 @@ export async function initialize() {
     controller: true,
     initialViewState: currentViewState,
     getTooltip: getStationTooltip,
+    onHover(info, event) {
+      if (info.viewport?.id !== 'main') return false;
+      state.mouseCoordinate = info.coordinate as [number, number];
+    },
     layerFilter: ({ layer, viewport, isPicking }) => {
       // Only render layers tagged `minimap` in minimap
       if (viewport.id === 'minimap') {
