@@ -16,6 +16,7 @@ import { createStore, easeInOutCubic, toSeconds } from './utils';
 
 // App State
 type State = {
+  brushingRadius: number,
   builderLayers: [
     VectorTileLayer, VectorTileLayer, HeatmapTileLayer, GeoJsonLayer
   ],
@@ -24,6 +25,7 @@ type State = {
 }
 const state = createStore<State>(
   {
+    brushingRadius: 1,
     range: [0, 120] as [number, number],
     selectedStation: -1,
   } as State,
@@ -136,8 +138,8 @@ function render() {
 
           // Filtering
           extensions: [new DataFilterExtension({filterSize: 2}), new BrushingExtension()],
-          brushingEnabled: true,
-          brushingRadius: 1000,
+          brushingEnabled: state.brushingRadius > 0,
+          brushingRadius: state.brushingRadius * 1609.34, // Convert to medieval unit system
           brushingTarget: 'target',
           getFilterValue: (d) => [
             d.properties.start_station_id,

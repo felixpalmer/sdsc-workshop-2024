@@ -1,6 +1,5 @@
-h1,
-h2 {
-  font-family: Lato;
+body {
+  font-family: Geneva, Tahoma, sans-serif;
 }
 #map,
 canvas {

@@ -1,4 +1,4 @@
-export function createUI(state: { range: [number, number] }) {
+export function createUI(state: { brushingRadius?: number, range?: [number, number] }) {
   document.getElementById('story-card')!.style.display = 'block';
 
   const minSlider = document.querySelector<HTMLSelectElement>(
@@ -20,14 +20,38 @@ export function createUI(state: { range: [number, number] }) {
   }
   minSlider?.addEventListener('input', onSliderInput, false);
   maxSlider?.addEventListener('input', onSliderInput, false);
+
+  const brushingSlider = document.querySelector<HTMLSelectElement>(
+    '#brushing-radius-slider'
+  )!;
+  const brushingLabel = document.querySelector('#brushing-radius-label')!;
+
+  function onBrushingInput() {
+    const brushingRadius = Number(brushingSlider.value);
+    state.brushingRadius = brushingRadius;
+    if (brushingRadius) {
+      brushingLabel!.textContent = `${brushingRadius} miles`;
+    } else {
+      brushingLabel!.textContent = 'Disabled';
+    }
+  }
+  brushingSlider?.addEventListener('input', onBrushingInput, false);
+}
+const tooltipStyle = {
+  left: '10px',
+  top: '10px',
+  background: '#fdfdfe',
+  boxShadow: '4px 4px 8px #30303099',
+  borderRadius: '4px',
+  color: '#000'
 }
 
 export function getStationTooltip(info: any) {
   if (!info?.object) return null;
-  const { start_station_id, ride_count } = info.object.properties;
-  let html = ''
-  for (const [name, value] of Object.entries(info.object.properties)) {
-    html += `<strong>${name}</strong>: ${value}<br/>`;
+  const { start_station_id, ...rest } = info.object.properties;
+  let html = start_station_id ? `<h3>Station: ${start_station_id}</h3>` : '';
+  for (const [name, value] of Object.entries(rest)) {
+    html += `<strong>${name.replace('_', ' ')}</strong>: ${value}<br/>`;
   }
-  return { html }
+  return { html, style: tooltipStyle }
 }
