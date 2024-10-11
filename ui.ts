@@ -21,6 +21,7 @@ export function createUI(state: { brushingRadius?: number, range?: [number, numb
   minSlider?.addEventListener('input', onSliderInput, false);
   maxSlider?.addEventListener('input', onSliderInput, false);
 
+
   const brushingSlider = document.querySelector<HTMLSelectElement>(
     '#brushing-radius-slider'
   )!;

@@ -31,20 +31,15 @@
       <h2>Citibike trips</h2>
       <div class="layer-controls"> 
         <p class="overline">Duration filter</p>
-        <input type="range" id="min-duration-slider" min="0" max="120" class="range-slider" value="0">
+        <input type="range" id="min-duration-slider" min="0" max="60" class="range-slider" value="0">
       </br>
-        <input type="range" id="max-duration-slider" min="0" max="120" class="range-slider" value="120">
-        <p><span id="duration-label">0 - 120 minutes</span></p>
+        <input type="range" id="max-duration-slider" min="0" max="60" class="range-slider" value="60">
+        <p><span id="duration-label">0 - 60 minutes</span></p>
       </br>
 
       <p class="overline">Brushing radius</p>
         <input type="range" id="brushing-radius-slider" min="0" max="2" class="range-slider" value="1" step="0.1">
         <p><span id="brushing-radius-label">1 mile</span></p>
-        <!--p class="overline">Layers</p>
-        <div class="basemap-selector">
-          <img class="basemap-button" data-map-id="ea84ae4203ef21cd" src="./images/preview-points.png" alt="Points">
-          <img class="basemap-button" data-map-id="2fccc3b36c22a0e2" src="./images/preview-buildings.png" alt="Buildings">
-        </div-->
       </div>
     </div>
     <script type="module" src="./index.ts"></script>
