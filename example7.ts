@@ -126,7 +126,8 @@ function render() {
       stroked: true,
       lineWidthMinPixels: 3,
       getFillColor: [255, 255, 255, 20],
-      getLineColor: [0, 0, 0, 50]
+      getLineColor: [0, 0, 0, 50],
+      parameters: { depthWriteEnabled: false }
     }),
 
     diamonds.clone({ id: 'stations', onClick: onStationClick }),
@@ -175,7 +176,7 @@ function render() {
       },
     }),
 
-    heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 50, intensity: 5, tileSize: 1024 }),
+    heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 20, tileSize: 1024 }),
   ];
   deck.setProps({ layers });
 }
@@ -205,8 +206,8 @@ export async function initialize() {
         return false;
       }
 
-      // Heatmap only above 12
-      if (viewport.zoom > 12) {
+      // Heatmap only above 11.5
+      if (viewport.zoom > 11.5) {
         if (layer.id === 'heatmap') return false;
       } else {
         if (layer.id !== 'heatmap') return false;

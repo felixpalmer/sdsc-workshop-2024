@@ -63,7 +63,7 @@ function render() {
     
     buildings.clone({ id: 'buildings-minimap', pickable: false, visible: true, parameters: { depthWriteEnabled: false } }),
 
-    heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 50, intensity: 5, tileSize: 1024 }),
+    heatmap.clone({ id: 'heatmap', pickable: false, visible: true, radiusPixels: 20, tileSize: 1024 }),
   ];
   deck.setProps({ layers });
 }
